@@ -157,14 +157,14 @@ func TestAnalysisHandlerGet(t *testing.T) {
 			instance.Get(ctx)
 
 			if writer.Code != testCase.expectedStatusCode {
-				t.Fatalf("Expecting status code %d, got %d", testCase.expectedStatusCode, writer.Code)
+				t.Fatalf("expected status code %d, got %d", testCase.expectedStatusCode, writer.Code)
 			}
 
 			if testCase.hasResponseBody {
 				aggregation := aggregate.PostsStatAggregation{}
 				responseBody, err := io.ReadAll(writer.Body)
 				if err != nil {
-					t.Errorf("Should be able to read response body, error %v", err)
+					t.Errorf("should be able to read response body, error %v", err)
 				}
 
 				err = json.Unmarshal(responseBody, &aggregation)
@@ -201,6 +201,6 @@ func TestAnalysisHandlerGetAggregateFeatureError(t *testing.T) {
 	instance.Get(ctx)
 
 	if writer.Code != http.StatusInternalServerError {
-		t.Fatalf("Expecting status code %d, got %d", http.StatusInternalServerError, writer.Code)
+		t.Fatalf("Expected status code %d, got %d", http.StatusInternalServerError, writer.Code)
 	}
 }

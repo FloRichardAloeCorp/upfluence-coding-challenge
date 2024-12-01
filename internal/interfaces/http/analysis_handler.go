@@ -42,7 +42,7 @@ func (h *AnalysisHandler) Get(c *gin.Context) {
 	duration, err := time.ParseDuration(rawDuration)
 	if err != nil {
 		h.log.Error("AnalysisHandler.Get error: can't parse duration", logs.Field{Key: "error", Value: err.Error()})
-		c.JSON(http.StatusBadRequest, "Query parameter duration in the go time duration format")
+		c.JSON(http.StatusBadRequest, "Query parameter duration is not in the go time duration format")
 		return
 	}
 
@@ -61,7 +61,7 @@ func (h *AnalysisHandler) Get(c *gin.Context) {
 	aggregate, err := h.aggregateFeatures.Aggregate(duration, dimension)
 	if err != nil {
 		h.log.Error("AnalysisHandler.Get error: ", logs.Field{Key: "error", Value: err.Error()})
-		c.JSON(http.StatusInternalServerError, "The server is not able to perform your request")
+		c.JSON(http.StatusInternalServerError, "The server is not able to perform the request")
 		return
 	}
 
