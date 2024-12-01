@@ -2,13 +2,16 @@ package aggregate
 
 import (
 	"cmp"
+	"errors"
 	"fmt"
 	"slices"
 	"time"
 )
 
 var (
-	_ AggregateFeatures = (*aggregateController)(nil)
+	_                   AggregateFeatures = (*aggregateController)(nil)
+	ErrNoPostsAvailable                   = errors.New("no posts available")
+	ErrUnknownDimension                   = errors.New("unknown dimension")
 )
 
 type aggregateController struct {
@@ -28,10 +31,10 @@ func (c *aggregateController) Aggregate(duration time.Duration, dimension string
 	}
 
 	if len(poststats) == 0 {
-		return nil, fmt.Errorf("no stats available")
+		return nil, ErrNoPostsAvailable
 	}
 
-	olderPost := slices.MinFunc(poststats, func(a, b postStats) int {
+	oldestPost := slices.MinFunc(poststats, func(a, b postStats) int {
 		return cmp.Compare(a.Timestamp, b.Timestamp)
 	})
 
@@ -41,31 +44,26 @@ func (c *aggregateController) Aggregate(duration time.Duration, dimension string
 
 	aggregation := &PostsStatAggregation{
 		TotalPosts:       len(poststats),
-		MinimumTimestamp: olderPost.Timestamp,
+		MinimumTimestamp: oldestPost.Timestamp,
 		MaximumTimestamp: latestPost.Timestamp,
 	}
 
-	if dimension == "likes" {
+	switch dimension {
+	case "likes":
 		aggregation.AvgLikes = intP(c.computeAvgLikes(poststats))
 		return aggregation, nil
-	}
-
-	if dimension == "comments" {
+	case "comments":
 		aggregation.AvgComments = intP(c.computeAvgComments(poststats))
 		return aggregation, nil
-	}
-
-	if dimension == "favorites" {
+	case "favorites":
 		aggregation.AvgFavorites = intP(c.computeAvgFavorites(poststats))
 		return aggregation, nil
-	}
-
-	if dimension == "retweets" {
+	case "retweets":
 		aggregation.AvgRetweets = intP(c.computeAvgRetweets(poststats))
 		return aggregation, nil
+	default:
+		return nil, ErrUnknownDimension
 	}
-
-	return aggregation, nil
 }
 
 func (c *aggregateController) computeAvgLikes(postsStats []postStats) int {
