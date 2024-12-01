@@ -5,81 +5,87 @@ import (
 	"bytes"
 	"crypto/rand"
 	"encoding/hex"
+	"errors"
 	"fmt"
 	"net/http"
 	"slices"
 	"sync"
+	"time"
+
+	"github.com/FloRichardAloeCorp/upfluence-coding-challenge/internal/logs"
 )
 
-var eventPrefix = []byte("data: ")
+var (
+	eventPrefix                     = []byte("data: ")
+	ErrReconnectionAttemptsExceeded = errors.New("reconnection attempts exceeded")
+)
 
+// SSEClient represents a client for consuming Server-Sent Events (SSE) streams.
+// It manages connections to the SSE server, handles reconnections on errors, and broadcasts events to subscribers.
 type SSEClient struct {
-	URL         string
-	Subscribers []Subscriber
+	url         string
+	subscribers []Subscriber
+
+	maxReconnectionAttempts int
 
 	// Mutex to protect Subscribers
 	mu sync.Mutex
 
 	closeChan chan struct{}
+
+	log *logs.Logger
 }
 
-func NewSSEClient(url string) *SSEClient {
+func NewSSEClient(config Config, log *logs.Logger) *SSEClient {
 	return &SSEClient{
-		URL:         url,
-		Subscribers: []Subscriber{},
-		mu:          sync.Mutex{},
-		closeChan:   make(chan struct{}),
+		url:                     config.ServerURL,
+		subscribers:             []Subscriber{},
+		maxReconnectionAttempts: config.MaxReconnectionAttempts,
+		mu:                      sync.Mutex{},
+		closeChan:               make(chan struct{}),
+		log:                     log,
 	}
 }
 
-// func (c *SSEClient) Launch() error {
-// 	maxAttempts := 5
-// 	for i := 0; i < maxAttempts; i++ {
-// 		if err := c.Listen(); err != nil {
-// 			fmt.Println("Can't listen to sse server, retrying in %d seconds. Error: %w", 1, err)
-// 		}
-
-// 		time.Sleep()
-// 	}
-// }
-
+// Listen establishes a connection to the SSE server and listens for events in a loop.
+// It handles reconnection logic with exponential backoff in case of errors or disconnections.
+//
+// This function is blocking, it the responsability of the caller to
+// launch it in a go routine.
 func (c *SSEClient) Listen() error {
-	res, err := http.Get(c.URL)
-	if err != nil {
-		return fmt.Errorf("can't do request: %w", err)
-	}
-
-	go func() {
-		defer res.Body.Close()
-
-		scanner := bufio.NewScanner(res.Body)
-		for {
-			select {
-			case <-c.closeChan:
-				return
-			default:
-				if scanner.Scan() {
-					line := scanner.Bytes()
-					if !bytes.HasPrefix(line, eventPrefix) {
-						continue
-					}
-
-					event := bytes.TrimPrefix(line, eventPrefix)
-
-					c.broadcast(event)
-					continue
-				}
-
-				if scanner.Err() != nil {
-					return
-				}
+	attempts := 0
+	for {
+		err := c.readStream()
+		if err != nil {
+			if attempts > c.maxReconnectionAttempts {
+				return ErrReconnectionAttemptsExceeded
 			}
-		}
-	}()
 
-	return nil
+			backoff := time.Duration(attempts) * 100 * time.Millisecond
+
+			c.log.Error("SSE Client error, attempting to reconnect to stream",
+				logs.Field{Key: "backoff", Value: backoff.String()},
+				logs.Field{Key: "error", Value: err.Error()},
+			)
+
+			time.Sleep(backoff)
+			attempts++
+			continue
+		}
+
+		// If connection is closed return
+		select {
+		case <-c.closeChan:
+			return nil
+		default:
+			// Retry connection
+		}
+	}
 }
 
+// NewSubscriber creates and returns a new subscriber.
+// It is the caller's responsibility to call RemoveSubscriber to clean up the subscriber
+// when it is no longer needed to avoid resource leaks.
 func (c *SSEClient) NewSubscriber() (*Subscriber, error) {
 	id, err := c.randomID()
 	if err != nil {
@@ -93,15 +99,20 @@ func (c *SSEClient) NewSubscriber() (*Subscriber, error) {
 
 	c.mu.Lock()
 	defer c.mu.Unlock()
-	c.Subscribers = append(c.Subscribers, subscriber)
+
+	c.subscribers = append(c.subscribers, subscriber)
 	return &subscriber, nil
 }
 
+// RemoveSubscriber removes the subscriber with the specified ID from the client's list
+// of active subscribers and closes the associated event channel.
+// This function must be called by the code that created the subscriber (e.g., after a
+// subscriber is no longer needed) to prevent resource leaks.
 func (c *SSEClient) RemoveSubscriber(id string) {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 
-	c.Subscribers = slices.DeleteFunc(c.Subscribers, func(s Subscriber) bool {
+	c.subscribers = slices.DeleteFunc(c.subscribers, func(s Subscriber) bool {
 		if s.ID == id {
 			close(s.Channel)
 			return true
@@ -111,13 +122,50 @@ func (c *SSEClient) RemoveSubscriber(id string) {
 	})
 }
 
+func (c *SSEClient) readStream() error {
+	res, err := http.Get(c.url)
+	if err != nil {
+		return fmt.Errorf("can't do request: %w", err)
+	}
+
+	if res.StatusCode != http.StatusOK {
+		return &InvalidStatusCodeError{Target: http.StatusOK, Current: res.StatusCode}
+	}
+
+	defer res.Body.Close()
+
+	scanner := bufio.NewScanner(res.Body)
+	for {
+		select {
+		case <-c.closeChan:
+			return nil
+		default:
+			if scanner.Scan() {
+				line := scanner.Bytes()
+				if !bytes.HasPrefix(line, eventPrefix) {
+					continue
+				}
+
+				event := bytes.TrimPrefix(line, eventPrefix)
+
+				c.broadcast(event)
+				continue
+			}
+
+			if scanner.Err() != nil {
+				return scanner.Err()
+			}
+		}
+	}
+}
+
 func (c *SSEClient) Close() {
 	close(c.closeChan)
 
 	c.mu.Lock()
 	defer c.mu.Unlock()
 
-	for _, sub := range c.Subscribers {
+	for _, sub := range c.subscribers {
 		select {
 		case <-sub.Channel:
 		default:
@@ -128,24 +176,24 @@ func (c *SSEClient) Close() {
 
 func (c *SSEClient) broadcast(event []byte) {
 
-	// Check the client is closed
+	// Check if the client is closed
 	select {
 	case <-c.closeChan:
 		return
 	default:
 	}
 
-	activeSubscribers := make([]Subscriber, 0, len(c.Subscribers))
+	activeSubscribers := make([]Subscriber, 0, len(c.subscribers))
 
 	c.mu.Lock()
-	for _, sub := range c.Subscribers {
+	for _, sub := range c.subscribers {
 		select {
 		case sub.Channel <- event:
 			activeSubscribers = append(activeSubscribers, sub)
 		default:
 		}
 	}
-	c.Subscribers = activeSubscribers
+	c.subscribers = activeSubscribers
 	c.mu.Unlock()
 }
 

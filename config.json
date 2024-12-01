@@ -1,6 +1,7 @@
 {
     "sse_client_config": {
-        "server_url": "https://stream.upfluence.co/stream"
+        "server_url": "https://stream.upfluence.co/stream",
+        "max_reconnection_attempts": 10
     },
     "router": {
         "addr": "",
@@ -17,6 +18,6 @@
         }
     },
     "logger": {
-        "level": "ERROR"
+        "level": "INFO"
     }
 }

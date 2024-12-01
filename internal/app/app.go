@@ -18,7 +18,7 @@ type RunCallback func()
 type CloseCallback func() error
 
 func Launch(config config.Config, log *logs.Logger) (RunCallback, CloseCallback, error) {
-	sseClient := sse.NewSSEClient(config.SSEClientConfig.ServerURL)
+	sseClient := sse.NewSSEClient(config.SSEClientConfig, log)
 
 	aggregateFeature := aggregate.NewAggregateFeatures(sseClient)
 
@@ -49,7 +49,12 @@ func Launch(config config.Config, log *logs.Logger) (RunCallback, CloseCallback,
 	}
 
 	run := func() {
-		sseClient.Listen()
+		go func() {
+			if err := sseClient.Listen(); err != nil {
+				log.Error("SSE Client error", logs.Field{Key: "error", Value: err.Error()})
+			}
+		}()
+
 		log.Info("REST API listening on " + addrGin)
 		log.Error(router.Run(addrGin).Error())
 	}
