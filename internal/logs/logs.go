@@ -77,7 +77,7 @@ func (l *Logger) print(msg string, extraFields ...Field) {
 	fields = append(fields, extraFields...)
 
 	content := encodeFieldsToJSON(fields...)
-	fmt.Fprintf(l.output, content)
+	fmt.Fprintln(l.output, content)
 }
 
 func getCallerInfo(skip int) (string, string, int) {
