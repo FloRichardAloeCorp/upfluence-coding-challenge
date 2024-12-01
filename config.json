@@ -1,0 +1,22 @@
+{
+    "sse_client_config": {
+        "server_url": "https://stream.upfluence.co/stream"
+    },
+    "router": {
+        "addr": "",
+        "port": 8080,
+        "gin_mode": "debug",
+        "shutdown_timeout": 5,
+        "analysis_handler_config": {
+            "authorized_dimensions": [
+                "likes",
+                "comments",
+                "favorites",
+                "retweets"
+            ]
+        }
+    },
+    "logger": {
+        "level": "ERROR"
+    }
+}
