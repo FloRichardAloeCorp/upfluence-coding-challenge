@@ -1,3 +1,4 @@
+//nolint:goconst
 package logs
 
 import (
@@ -29,7 +30,10 @@ func TestNewLogger(t *testing.T) {
 	// Success case with a file
 	dir := t.TempDir()
 	logFileName := dir + "/log.txt"
-	os.Create(logFileName)
+	_, err = os.Create(logFileName)
+	if err != nil {
+		t.Fatalf("Unexpected error: %v ", err)
+	}
 
 	config = Config{
 		Level:      "INFO",
@@ -51,7 +55,7 @@ func TestNewLogger(t *testing.T) {
 		OutputPath: "unknown",
 	}
 
-	log, err = NewLogger(config)
+	_, err = NewLogger(config)
 	if err == nil {
 		t.Fatalf("An error is expected")
 	}
@@ -60,7 +64,10 @@ func TestNewLogger(t *testing.T) {
 func TestLoggerInfo(t *testing.T) {
 	dir := t.TempDir()
 	logFileName := dir + "/log.txt"
-	os.Create(logFileName)
+	_, err := os.Create(logFileName)
+	if err != nil {
+		t.Fatalf("Unexpected error: %v ", err)
+	}
 
 	config := Config{
 		Level:      "INFO",
@@ -107,7 +114,10 @@ func TestLoggerInfo(t *testing.T) {
 func TestLoggerInfoWithErrorLevel(t *testing.T) {
 	dir := t.TempDir()
 	logFileName := dir + "/log.txt"
-	os.Create(logFileName)
+	_, err := os.Create(logFileName)
+	if err != nil {
+		t.Fatalf("Unexpected error: %v ", err)
+	}
 
 	config := Config{
 		Level:      "ERROR",
@@ -134,7 +144,10 @@ func TestLoggerInfoWithErrorLevel(t *testing.T) {
 func TestLoggerError(t *testing.T) {
 	dir := t.TempDir()
 	logFileName := dir + "/log.txt"
-	os.Create(logFileName)
+	_, err := os.Create(logFileName)
+	if err != nil {
+		t.Fatalf("Unexpected error: %v ", err)
+	}
 
 	config := Config{
 		Level:      "ERROR",
@@ -181,7 +194,10 @@ func TestLoggerError(t *testing.T) {
 func TestLoggerErrorWithInfoLevel(t *testing.T) {
 	dir := t.TempDir()
 	logFileName := dir + "/log.txt"
-	os.Create(logFileName)
+	_, err := os.Create(logFileName)
+	if err != nil {
+		t.Fatalf("Unexpected error: %v ", err)
+	}
 
 	config := Config{
 		Level:      "INFO",
@@ -233,7 +249,7 @@ func TestGetCallerInfo(t *testing.T) {
 		expectedFile    string
 	}
 
-	var testCases = [...]testData{
+	testCases := [...]testData{
 		{
 			name:            "Success case: skip set to 1",
 			skip:            1,

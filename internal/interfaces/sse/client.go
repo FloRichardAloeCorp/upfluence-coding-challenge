@@ -20,9 +20,9 @@ var (
 	ErrReconnectionAttemptsExceeded = errors.New("reconnection attempts exceeded")
 )
 
-// SSEClient represents a client for consuming Server-Sent Events (SSE) streams.
+// Client represents a client for consuming Server-Sent Events (SSE) streams.
 // It manages connections to the SSE server, handles reconnections on errors, and broadcasts events to subscribers.
-type SSEClient struct {
+type Client struct {
 	url         string
 	subscribers []Subscriber
 
@@ -36,8 +36,8 @@ type SSEClient struct {
 	log *logs.Logger
 }
 
-func NewSSEClient(config Config, log *logs.Logger) *SSEClient {
-	return &SSEClient{
+func NewSSEClient(config Config, log *logs.Logger) *Client {
+	return &Client{
 		url:                     config.ServerURL,
 		subscribers:             []Subscriber{},
 		maxReconnectionAttempts: config.MaxReconnectionAttempts,
@@ -50,9 +50,9 @@ func NewSSEClient(config Config, log *logs.Logger) *SSEClient {
 // Listen establishes a connection to the SSE server and listens for events in a loop.
 // It handles reconnection logic with exponential backoff in case of errors or disconnections.
 //
-// This function is blocking, it the responsability of the caller to
+// This function is blocking, it the responsibility of the caller to
 // launch it in a go routine.
-func (c *SSEClient) Listen() error {
+func (c *Client) Listen() error {
 	attempts := 0
 	for {
 		err := c.readStream()
@@ -86,7 +86,7 @@ func (c *SSEClient) Listen() error {
 // NewSubscriber creates and returns a new subscriber.
 // It is the caller's responsibility to call RemoveSubscriber to clean up the subscriber
 // when it is no longer needed to avoid resource leaks.
-func (c *SSEClient) NewSubscriber() (*Subscriber, error) {
+func (c *Client) NewSubscriber() (*Subscriber, error) {
 	id, err := c.randomID()
 	if err != nil {
 		return nil, err
@@ -108,7 +108,7 @@ func (c *SSEClient) NewSubscriber() (*Subscriber, error) {
 // of active subscribers and closes the associated event channel.
 // This function must be called by the code that created the subscriber (e.g., after a
 // subscriber is no longer needed) to prevent resource leaks.
-func (c *SSEClient) RemoveSubscriber(id string) {
+func (c *Client) RemoveSubscriber(id string) {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 
@@ -122,7 +122,7 @@ func (c *SSEClient) RemoveSubscriber(id string) {
 	})
 }
 
-func (c *SSEClient) readStream() error {
+func (c *Client) readStream() error {
 	res, err := http.Get(c.url)
 	if err != nil {
 		return fmt.Errorf("can't do request: %w", err)
@@ -159,7 +159,7 @@ func (c *SSEClient) readStream() error {
 	}
 }
 
-func (c *SSEClient) Close() {
+func (c *Client) Close() {
 	close(c.closeChan)
 
 	c.mu.Lock()
@@ -174,8 +174,7 @@ func (c *SSEClient) Close() {
 	}
 }
 
-func (c *SSEClient) broadcast(event []byte) {
-
+func (c *Client) broadcast(event []byte) {
 	// Check if the client is closed
 	select {
 	case <-c.closeChan:
@@ -197,7 +196,7 @@ func (c *SSEClient) broadcast(event []byte) {
 	c.mu.Unlock()
 }
 
-func (c *SSEClient) randomID() (string, error) {
+func (c *Client) randomID() (string, error) {
 	bytes := make([]byte, 16)
 	if _, err := rand.Read(bytes); err != nil {
 		return "", fmt.Errorf("can't generate random id")

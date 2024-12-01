@@ -45,8 +45,10 @@ func TestPostStatsRepositoryReadFor(t *testing.T) {
 	}
 
 	sseClient := sse.NewSSEClient(sseClientConfig, loggerInstance)
+
+	var listenErr error
 	go func() {
-		sseClient.Listen()
+		listenErr = sseClient.Listen()
 	}()
 	defer sseClient.Close()
 
@@ -57,6 +59,10 @@ func TestPostStatsRepositoryReadFor(t *testing.T) {
 	posts, err := repo.ReadFor(4 * time.Second)
 	if err != nil {
 		t.Fatalf("unexpected error, got %v", err)
+	}
+
+	if listenErr != nil {
+		t.Fatalf("unexpected error from sseClient.Listen, got %v", err)
 	}
 
 	if len(posts) == 0 {
@@ -74,8 +80,9 @@ func TestPostStatsRepositoryReadForInvalidEvent(t *testing.T) {
 	}
 
 	sseClient := sse.NewSSEClient(sseClientConfig, loggerInstance)
+	var listenErr error
 	go func() {
-		sseClient.Listen()
+		listenErr = sseClient.Listen()
 	}()
 	defer sseClient.Close()
 
@@ -86,6 +93,10 @@ func TestPostStatsRepositoryReadForInvalidEvent(t *testing.T) {
 	posts, err := repo.ReadFor(4 * time.Second)
 	if err == nil {
 		t.Fatalf("expected error %v, got %v", ErrClosedSubscriber, err)
+	}
+
+	if listenErr != nil {
+		t.Fatalf("unexpected error from sseClient.Listen, got %v", err)
 	}
 
 	if len(posts) != 0 {
@@ -101,7 +112,7 @@ func TestPostStatsRepositoryDecodeEvent(t *testing.T) {
 		expectedResult *postStats
 	}
 
-	var testCases = [...]testData{
+	testCases := [...]testData{
 		{
 			name:       "Success case",
 			event:      []byte(`{"yt":{"likes":2,"timestamp":1}}`),

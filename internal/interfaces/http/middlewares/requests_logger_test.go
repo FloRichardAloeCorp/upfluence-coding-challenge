@@ -13,7 +13,10 @@ import (
 func TestRequestsLogger(t *testing.T) {
 	dir := t.TempDir()
 	logFileName := dir + "/log.txt"
-	os.Create(logFileName)
+	_, err := os.Create(logFileName)
+	if err != nil {
+		t.Fatalf("Unexpected error: %v ", err)
+	}
 
 	config := logs.Config{
 		Level:      "INFO",

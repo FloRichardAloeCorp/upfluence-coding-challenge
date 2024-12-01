@@ -10,7 +10,6 @@ func TestNewRouter(t *testing.T) {
 	log, err := logs.NewLogger(logs.Config{
 		Level: "INFO",
 	})
-
 	if err != nil {
 		t.Fatal("unexpected error during logger instanciation")
 	}

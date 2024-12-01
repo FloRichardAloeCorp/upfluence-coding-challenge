@@ -63,7 +63,7 @@ func TestAnalysisHandlerGet(t *testing.T) {
 		hasResponseBody     bool
 	}
 
-	var testCases = [...]testData{
+	testCases := [...]testData{
 		{
 			name: "Success case",
 			queryParams: map[string]string{

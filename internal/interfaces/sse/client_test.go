@@ -38,7 +38,7 @@ func TestSSEClientListen(t *testing.T) {
 	server := createSSEServerMock(250 * time.Millisecond)
 	defer server.Close()
 
-	client := &SSEClient{
+	client := &Client{
 		url: server.URL,
 		subscribers: []Subscriber{
 			{
@@ -80,7 +80,6 @@ func TestSSEClientListen(t *testing.T) {
 
 	expectedEventData := []byte("dummy event")
 	for _, event := range receivedEvents {
-
 		if !bytes.Equal(event, expectedEventData) {
 			t.Fatalf("Expecting event to be %q, got %q", expectedEventData, event)
 		}
@@ -88,7 +87,7 @@ func TestSSEClientListen(t *testing.T) {
 }
 
 func TestSSEClientListenReconnectionAttempsExceeded(t *testing.T) {
-	client := &SSEClient{
+	client := &Client{
 		url: "http://dummy.com/stream",
 		subscribers: []Subscriber{
 			{
@@ -137,7 +136,7 @@ func TestSSEClientListenWithoutSubscribers(t *testing.T) {
 	server := createSSEServerMock(250 * time.Millisecond)
 	defer server.Close()
 
-	client := &SSEClient{
+	client := &Client{
 		url:       server.URL,
 		closeChan: make(chan struct{}),
 		log:       loggerInstance,
@@ -164,7 +163,7 @@ func TestSSEClientClosingClient(t *testing.T) {
 	server := createSSEServerMock(2 * time.Second)
 	defer server.Close()
 
-	client := &SSEClient{
+	client := &Client{
 		url: server.URL,
 		subscribers: []Subscriber{
 			{
@@ -209,7 +208,7 @@ func TestSSEClientClosingClient(t *testing.T) {
 }
 
 func TestSSEClientNewSubscriber(t *testing.T) {
-	client := &SSEClient{
+	client := &Client{
 		subscribers: []Subscriber{},
 	}
 
@@ -232,7 +231,7 @@ func TestSSEClientNewSubscriber(t *testing.T) {
 }
 
 func TestSSEClientRemoveSubscriber(t *testing.T) {
-	client := &SSEClient{
+	client := &Client{
 		subscribers: []Subscriber{},
 	}
 

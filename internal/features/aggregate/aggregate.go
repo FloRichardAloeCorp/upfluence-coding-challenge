@@ -6,11 +6,11 @@ import (
 	"github.com/FloRichardAloeCorp/upfluence-coding-challenge/internal/interfaces/sse"
 )
 
-type AggregateFeatures interface {
+type AggregateFeatures interface { //nolint:revive
 	Aggregate(duration time.Duration, dimension string) (*PostsStatAggregation, error)
 }
 
-func NewAggregateFeatures(sseClient *sse.SSEClient) AggregateFeatures {
+func NewAggregateFeatures(sseClient *sse.Client) AggregateFeatures {
 	repo := &postStatsRepository{
 		sseClient: sseClient,
 	}

@@ -23,7 +23,7 @@ type iPostStatsRepository interface {
 }
 
 type postStatsRepository struct {
-	sseClient *sse.SSEClient
+	sseClient *sse.Client
 }
 
 func (r *postStatsRepository) ReadFor(duration time.Duration) ([]postStats, error) {

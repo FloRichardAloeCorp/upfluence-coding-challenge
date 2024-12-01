@@ -4,7 +4,6 @@ import (
 	"os"
 	"slices"
 	"testing"
-	// model "github.com/FloRichardAloeCorp/upfluence-coding-challenge/pkg/structs"
 )
 
 var rawConfig = `{"sse_client_config":{"server_url":"https://stream.upfluence.co/stream","max_reconnection_attempts":10},"router":{"addr":"","port":8080,"gin_mode":"debug","shutdown_timeout":5,"analysis_handler_config":{"authorized_dimensions":["likes","comments","favorites","retweets"]}},"logger":{"level":"INFO"}}`
@@ -12,7 +11,7 @@ var rawConfig = `{"sse_client_config":{"server_url":"https://stream.upfluence.co
 func TestLoad(t *testing.T) {
 	dir := t.TempDir()
 	configPath := dir + "/config.json"
-	err := os.WriteFile(configPath, []byte(rawConfig), 0666)
+	err := os.WriteFile(configPath, []byte(rawConfig), 0o600)
 	if err != nil {
 		t.Fatalf("unexpected error while writing config file: %v", err)
 	}
@@ -72,7 +71,7 @@ func TestLoadInvalidPath(t *testing.T) {
 func TestLoadInvalidConfigurationFormat(t *testing.T) {
 	dir := t.TempDir()
 	configPath := dir + "/config.json"
-	err := os.WriteFile(configPath, []byte("this is not a json string"), 0666)
+	err := os.WriteFile(configPath, []byte("this is not a json string"), 0o600)
 	if err != nil {
 		t.Fatalf("unexpected error while writing config file: %v", err)
 	}

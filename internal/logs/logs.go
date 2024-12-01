@@ -24,14 +24,6 @@ type Config struct {
 	OutputPath string `json:"output_path,omitempty"`
 }
 
-type log struct {
-	Level   string    `json:"level"`
-	Time    time.Time `json:"time"`
-	Caller  string    `json:"caller"`
-	Package string    `json:"package"`
-	Msg     string    `json:"msg"`
-}
-
 func NewLogger(config Config) (*Logger, error) {
 	var err error
 	output := os.Stderr

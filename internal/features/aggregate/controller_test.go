@@ -11,7 +11,7 @@ type postStatsRepositoryMocking struct {
 	NoResults   bool
 }
 
-func (r *postStatsRepositoryMocking) ReadFor(duration time.Duration) ([]postStats, error) {
+func (r *postStatsRepositoryMocking) ReadFor(_ time.Duration) ([]postStats, error) {
 	if r.returnError {
 		return nil, fmt.Errorf("error")
 	}
@@ -77,7 +77,7 @@ func TestAggregateControllerAggregate(t *testing.T) {
 		expectedResult *PostsStatAggregation
 	}
 
-	var testCases = [...]testData{
+	testCases := [...]testData{
 		{
 			name:       "Success case with likes",
 			shouldFail: false,
@@ -85,7 +85,7 @@ func TestAggregateControllerAggregate(t *testing.T) {
 				returnError: false,
 				NoResults:   false,
 			},
-			duration:  time.Duration(5 * time.Second),
+			duration:  5 * time.Second,
 			dimension: "likes",
 			expectedResult: &PostsStatAggregation{
 				TotalPosts:       2,
@@ -104,7 +104,7 @@ func TestAggregateControllerAggregate(t *testing.T) {
 				returnError: false,
 				NoResults:   false,
 			},
-			duration:  time.Duration(5 * time.Second),
+			duration:  5 * time.Second,
 			dimension: "comments",
 			expectedResult: &PostsStatAggregation{
 				TotalPosts:       2,
@@ -123,7 +123,7 @@ func TestAggregateControllerAggregate(t *testing.T) {
 				returnError: false,
 				NoResults:   false,
 			},
-			duration:  time.Duration(5 * time.Second),
+			duration:  5 * time.Second,
 			dimension: "retweets",
 			expectedResult: &PostsStatAggregation{
 				TotalPosts:       2,
@@ -142,7 +142,7 @@ func TestAggregateControllerAggregate(t *testing.T) {
 				returnError: false,
 				NoResults:   false,
 			},
-			duration:  time.Duration(5 * time.Second),
+			duration:  5 * time.Second,
 			dimension: "favorites",
 			expectedResult: &PostsStatAggregation{
 				TotalPosts:       2,
@@ -161,7 +161,7 @@ func TestAggregateControllerAggregate(t *testing.T) {
 				returnError: true,
 				NoResults:   false,
 			},
-			duration:  time.Duration(5 * time.Second),
+			duration:  5 * time.Second,
 			dimension: "likes",
 		},
 		{
@@ -171,7 +171,7 @@ func TestAggregateControllerAggregate(t *testing.T) {
 				returnError: false,
 				NoResults:   true,
 			},
-			duration:  time.Duration(5 * time.Second),
+			duration:  5 * time.Second,
 			dimension: "likes",
 		},
 		{
@@ -181,7 +181,7 @@ func TestAggregateControllerAggregate(t *testing.T) {
 				returnError: false,
 				NoResults:   false,
 			},
-			duration:  time.Duration(5 * time.Second),
+			duration:  5 * time.Second,
 			dimension: "invalid",
 		},
 	}
@@ -215,7 +215,7 @@ func TestAggregateControllerComputeAvgLikes(t *testing.T) {
 		expectedResult int
 	}
 
-	var testCases = [...]testData{
+	testCases := [...]testData{
 		{
 			name: "Succes case",
 			postsStats: []postStats{
@@ -259,7 +259,7 @@ func TestAggregateControllerComputeAvgComments(t *testing.T) {
 		expectedResult int
 	}
 
-	var testCases = [...]testData{
+	testCases := [...]testData{
 		{
 			name: "Succes case",
 			postsStats: []postStats{
@@ -303,7 +303,7 @@ func TestAggregateControllerComputeAvgFavorites(t *testing.T) {
 		expectedResult int
 	}
 
-	var testCases = [...]testData{
+	testCases := [...]testData{
 		{
 			name: "Succes case",
 			postsStats: []postStats{
@@ -347,7 +347,7 @@ func TestAggregateControllerComputeAvgRetweets(t *testing.T) {
 		expectedResult int
 	}
 
-	var testCases = [...]testData{
+	testCases := [...]testData{
 		{
 			name: "Succes case",
 			postsStats: []postStats{

@@ -11,7 +11,7 @@ var ErrInvalidData = errors.New("invalid data")
 
 type AggregateFeatureMocking struct{}
 
-func (a *AggregateFeatureMocking) Aggregate(duration time.Duration, dimension string) (*aggregate.PostsStatAggregation, error) {
+func (a *AggregateFeatureMocking) Aggregate(_ time.Duration, _ string) (*aggregate.PostsStatAggregation, error) {
 	return &aggregate.PostsStatAggregation{
 		TotalPosts:       12,
 		MinimumTimestamp: 1,
@@ -22,7 +22,7 @@ func (a *AggregateFeatureMocking) Aggregate(duration time.Duration, dimension st
 
 type AggregateFeatureErrorMocking struct{}
 
-func (a *AggregateFeatureErrorMocking) Aggregate(duration time.Duration, dimension string) (*aggregate.PostsStatAggregation, error) {
+func (a *AggregateFeatureErrorMocking) Aggregate(_ time.Duration, _ string) (*aggregate.PostsStatAggregation, error) {
 	return nil, ErrInvalidData
 }
 

@@ -7,13 +7,7 @@ import (
 )
 
 func TestNewAggregateFeatures(t *testing.T) {
-	type testData struct {
-		name         string
-		sseClient    *sse.SSEClient
-		expectedRes1 AggregateFeatures
-	}
-
-	sseClient := &sse.SSEClient{}
+	sseClient := &sse.Client{}
 
 	feature := NewAggregateFeatures(sseClient)
 

@@ -11,15 +11,14 @@ import (
 )
 
 const (
-	PREFIX_ENV          = "API"
-	ENV_CONFIG          = PREFIX_ENV + "_CONFIG"
-	DEFAULT_CONFIG_PATH = "./config.json"
+	ConfigPathEnvVar  = "API_CONFIG"
+	DefaultConfigPath = "./config.json"
 )
 
 func main() {
-	configFilePath, present := os.LookupEnv(ENV_CONFIG)
+	configFilePath, present := os.LookupEnv(ConfigPathEnvVar)
 	if !present {
-		configFilePath = DEFAULT_CONFIG_PATH
+		configFilePath = DefaultConfigPath
 	}
 
 	config, err := config.Load(configFilePath)
@@ -32,22 +31,24 @@ func main() {
 		panic(err)
 	}
 
-	run, close, err := app.Launch(*config, log)
+	run, shutdown, err := app.Launch(*config, log)
 	if err != nil {
 		panic(err)
 	}
 
 	go run()
 
-	WaitSignalShutdown(close, log)
+	WaitSignalShutdown(shutdown, log)
 }
 
-func WaitSignalShutdown(close func() error, log *logs.Logger) {
+func WaitSignalShutdown(shutdown func() error, log *logs.Logger) {
 	// Wait for interrupt signal to gracefully shutdown the server
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
 	<-quit
 	log.Info("Shutdown Server ...")
 
-	close()
+	if err := shutdown(); err != nil {
+		log.Error("Fail to properly close the server", logs.Field{Key: "error", Value: err.Error()})
+	}
 }

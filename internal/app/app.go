@@ -14,8 +14,10 @@ import (
 	"github.com/FloRichardAloeCorp/upfluence-coding-challenge/internal/logs"
 )
 
-type RunCallback func()
-type CloseCallback func() error
+type (
+	RunCallback   func()
+	CloseCallback func() error
+)
 
 func Launch(config config.Config, log *logs.Logger) (RunCallback, CloseCallback, error) {
 	sseClient := sse.NewSSEClient(config.SSEClientConfig, log)
@@ -35,7 +37,7 @@ func Launch(config config.Config, log *logs.Logger) (RunCallback, CloseCallback,
 		Handler:           router,
 	}
 
-	close := func() error {
+	shutdown := func() error {
 		ctx, cancel := context.WithTimeout(context.Background(), time.Duration(config.Router.ShutdownTimeout)*time.Second)
 		defer cancel()
 
@@ -59,5 +61,5 @@ func Launch(config config.Config, log *logs.Logger) (RunCallback, CloseCallback,
 		log.Error(router.Run(addrGin).Error())
 	}
 
-	return run, close, nil
+	return run, shutdown, nil
 }
