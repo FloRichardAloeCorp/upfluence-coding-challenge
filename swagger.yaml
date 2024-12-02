@@ -27,6 +27,7 @@ paths:
           in: query
           description: |-
             The dimension to include in the response. Accepted values are: likes, comments, retweets, favorites.
+            `retweets` and `favorites` dimensions are only available for tweeter posts.
           schema:
             type: string
           example: likes
