@@ -1,0 +1,74 @@
+openapi: 3.0.3
+info:
+  title: Upfluence Coding Challenge
+  description: |-
+    This is an HTTP server that processes, aggregates, and provides data sent by the Upfluence public API endpoint streaming social media posts.
+  version: 1.0.0
+
+tags:
+  - name: Analysis
+
+paths:
+  /analysis:
+    get:
+      tags:
+        - Analysis
+      summary: Get an analysis of Upfluence-processed posts
+      description: |- 
+        Aggregates and returns statistics about streamed posts. The endpoint will listen for the provided `duration` and return a report of the processed data, including the supplied `dimension`.
+      parameters:
+        - name: duration
+          in: query
+          description: Duration in Go format (e.g., 5s for 5 seconds)
+          schema: 
+            type: string 
+          example: 5s
+        - name: dimension
+          in: query
+          description: |-
+            The dimension to include in the response. Accepted values are: likes, comments, retweets, favorites.
+          schema:
+            type: string
+          example: likes
+      
+      responses:
+        '200':
+          description: Successful operation. `avg_<name>` fields depend on `dimension` query parameter.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PostsStatsAggregation'
+                
+        '400':
+          description: Invalid parameters
+        '500':
+          description: The server encountered an error and could not process the request
+        
+components:
+  schemas:
+    PostsStatsAggregation:
+      type: object
+      description: Representation of post statistics
+      properties:
+        total_posts:
+          type: integer
+          description: Total number of posts analyzed, including those without statistics for the specified dimension.
+        minimum_timestamp:
+          type: number 
+          description: Unix timestamp of the oldest post analyzed.
+        maximum_timestamp:
+          type: number
+          description: Unix timestamp of the latest post analyzed.
+        avg_likes:
+          type: number
+          description: Average number of likes. Only present if the supplied dimension is `likes`.
+        avg_comments:
+          type: number
+          description: Average number of comments. Only present if the supplied dimension is `comments`.
+        avg_retweets:
+          type: number
+          description: Average number of retweets. Only present if the supplied dimension is `retweets`.
+        avg_favorites:
+          type: number
+          description: Average number of favorites. Only present if the supplied dimension is `favorites`.
+      required: ['total_posts', 'minimum_timestamp', 'maximum_timestamp']
