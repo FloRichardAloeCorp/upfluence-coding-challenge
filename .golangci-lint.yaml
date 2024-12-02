@@ -2,4 +2,6 @@ run:
   deadline: 5m
 
 linters:
+  enable:
+    - misspell
   fast: false
