@@ -90,6 +90,22 @@ make test
 
 **NOTE:** The Upfluence public API is mocked during unit tests, so no external services are involved in testing.
 
+Current testing states:
+
+```bash
+go clean -testcache
+go test -timeout 1m -cover ./...
+        github.com/FloRichardAloeCorp/upfluence-coding-challenge                coverage: 0.0% of statements
+        github.com/FloRichardAloeCorp/upfluence-coding-challenge/internal/app           coverage: 0.0% of statements
+        github.com/FloRichardAloeCorp/upfluence-coding-challenge/test/mockings          coverage: 0.0% of statements
+ok      github.com/FloRichardAloeCorp/upfluence-coding-challenge/internal/config        2.689s  coverage: 100.0% of statements
+ok      github.com/FloRichardAloeCorp/upfluence-coding-challenge/internal/features/aggregate    10.972s coverage: 96.0% of statements
+ok      github.com/FloRichardAloeCorp/upfluence-coding-challenge/internal/interfaces/http       0.478s  coverage: 100.0% of statements
+ok      github.com/FloRichardAloeCorp/upfluence-coding-challenge/internal/interfaces/http/middlewares   2.253s  coverage: 100.0% of statements
+ok      github.com/FloRichardAloeCorp/upfluence-coding-challenge/internal/interfaces/sse        20.452s coverage: 91.2% of statements
+ok      github.com/FloRichardAloeCorp/upfluence-coding-challenge/internal/logs  1.824s  coverage: 100.0% of statements
+```
+
 ## Architectural Design
 
 The project follows the principles of the "Screaming" architecture. It emphasizes clarity, ensuring the codebase explicitly reflects the business logic. Features are abstracted and decoupled from incoming and outgoing traffic, enabling low coupling and better maintainability.
