@@ -10,6 +10,8 @@ The API establishes a single connection to the server and broadcasts the stream 
 
 Posts streamed may or may not contain the desired dimensions, but the server analyzes all posts. Equivalent dimensions are rendered consistently; for example, likes are always represented with the likes JSON field. This enables generic parsing and processing of events without needing to know from which platform the posts were published.
 
+I've followed the coding challenge instructions, which require using only the standard library except for the server. To create the HTTP server, I've used the [Gin](https://github.com/gin-gonic/gin) framework.
+
 ## Installation
 
 ### Requirements
