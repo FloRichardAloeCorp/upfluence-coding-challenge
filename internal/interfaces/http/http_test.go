@@ -16,7 +16,6 @@ func TestNewRouter(t *testing.T) {
 
 	conf := Config{
 		GinMode:         "debug",
-		Addr:            "",
 		Port:            8080,
 		ShutdownTimeout: 10,
 	}

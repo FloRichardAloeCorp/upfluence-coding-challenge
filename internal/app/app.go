@@ -30,7 +30,7 @@ func Launch(config config.Config, log *logs.Logger) (RunCallback, CloseCallback,
 
 	analysisHandler.RegisterRoutes(router)
 
-	addrGin := config.Router.Addr + ":" + strconv.Itoa(config.Router.Port)
+	addrGin := ":" + strconv.Itoa(config.Router.Port)
 	srv := &http.Server{
 		ReadHeaderTimeout: time.Millisecond,
 		Addr:              addrGin,

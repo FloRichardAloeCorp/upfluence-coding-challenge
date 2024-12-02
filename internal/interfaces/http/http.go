@@ -8,7 +8,6 @@ import (
 
 type Config struct {
 	GinMode               string                `json:"gin_mode"`
-	Addr                  string                `json:"addr"`
 	Port                  int                   `json:"port"`
 	ShutdownTimeout       int                   `json:"shutdown_timeout"`
 	AnalysisHandlerConfig AnalysisHandlerConfig `json:"analysis_handler_config"`

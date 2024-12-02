@@ -4,7 +4,6 @@
         "max_reconnection_attempts": 10
     },
     "router": {
-        "addr": "",
         "port": 8080,
         "gin_mode": "debug",
         "shutdown_timeout": 5,

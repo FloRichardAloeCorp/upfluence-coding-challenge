@@ -6,7 +6,7 @@ import (
 	"testing"
 )
 
-var rawConfig = `{"sse_client_config":{"server_url":"https://stream.upfluence.co/stream","max_reconnection_attempts":10},"router":{"addr":"","port":8080,"gin_mode":"debug","shutdown_timeout":5,"analysis_handler_config":{"authorized_dimensions":["likes","comments","favorites","retweets"]}},"logger":{"level":"INFO"}}`
+var rawConfig = `{"sse_client_config":{"server_url":"https://stream.upfluence.co/stream","max_reconnection_attempts":10},"router":{"port":8080,"gin_mode":"debug","shutdown_timeout":5,"analysis_handler_config":{"authorized_dimensions":["likes","comments","favorites","retweets"]}},"logger":{"level":"INFO"}}`
 
 func TestLoad(t *testing.T) {
 	dir := t.TempDir()
@@ -31,10 +31,6 @@ func TestLoad(t *testing.T) {
 
 	if config.SSEClientConfig.MaxReconnectionAttempts != 10 {
 		t.Errorf("expected SSEClientConfig.MaxReconnectionAttempts to be 10, got '%d'", config.SSEClientConfig.MaxReconnectionAttempts)
-	}
-
-	if config.Router.Addr != "" {
-		t.Errorf("expected Router.Addr to be '', got '%s'", config.Router.Addr)
 	}
 
 	if config.Router.Port != 8080 {
