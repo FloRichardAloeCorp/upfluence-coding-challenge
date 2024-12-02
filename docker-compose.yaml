@@ -1,0 +1,14 @@
+version: '3'
+services:
+    upfluence_coding_challenge:
+        build:
+            context: .
+            dockerfile: Dockerfile
+        restart: always
+        container_name: upfluence_coding_challenge
+        ports:
+            - 8080:8080
+        volumes:
+            - ./config.json:/config/config.json:ro
+        environment:
+            API_CONFIG: '/config/config.json'
