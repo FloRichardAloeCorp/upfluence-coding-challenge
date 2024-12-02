@@ -106,6 +106,29 @@ ok      github.com/FloRichardAloeCorp/upfluence-coding-challenge/internal/interf
 ok      github.com/FloRichardAloeCorp/upfluence-coding-challenge/internal/logs  1.824s  coverage: 100.0% of statements
 ```
 
+### Integration tests
+You can find the integration test suites under the `/integration_tests` folder. Integration tests are run using the [venom](https://github.com/ovh/venom) tool.
+
+To run the integration tests, install venom, then navigate to the `/integration_tests` folder and run the following command:
+
+```
+venom run suites.yaml
+```
+
+Current testing state:
+
+```bash
+venom run suites.yaml
+    • GET /analysis tests (suites.yaml)
+        • Get-analysis-with-likes-dimension PASS
+        • Get-analysis-with-comments-dimension PASS
+        • Get-analysis-with-retweets-dimension PASS
+        • Get-analysis-with-favorites-dimension PASS
+    final status: PASS
+```
+
+NOTE: The API must be launched before running integration tests.
+
 ## Architectural Design
 
 The project follows the principles of the "Screaming" architecture. It emphasizes clarity, ensuring the codebase explicitly reflects the business logic. Features are abstracted and decoupled from incoming and outgoing traffic, enabling low coupling and better maintainability.

@@ -46,6 +46,12 @@ func (h *AnalysisHandler) Get(c *gin.Context) {
 		return
 	}
 
+	if duration.Seconds() < 0 {
+		h.log.Error("AnalysisHandler.Get error: negative duration", logs.Field{Key: "duration", Value: rawDuration})
+		c.JSON(http.StatusBadRequest, "Query parameter duration must be a positive value")
+		return
+	}
+
 	dimension, ok := c.GetQuery("dimension")
 	if !ok {
 		c.JSON(http.StatusBadRequest, "Query parameter dimension is missing")

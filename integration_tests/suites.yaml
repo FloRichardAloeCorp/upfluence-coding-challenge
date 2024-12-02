@@ -1,0 +1,62 @@
+name: GET /analysis tests
+
+testcases:
+  - name: Get analysis with likes dimension
+    steps:
+      - type: http
+        method: GET
+        url: "{{.api_url}}/analysis"
+        query_parameters:
+          duration: 2s
+          dimension: likes
+        assertions:
+          - result.statuscode ShouldEqual 200
+          - result.bodyjson ShouldContainKey total_posts
+          - result.bodyjson ShouldContainKey minimum_timestamp
+          - result.bodyjson ShouldContainKey minimum_timestamp
+          - result.bodyjson ShouldContainKey avg_likes
+
+  - name: Get analysis with comments dimension
+    steps:
+      - type: http
+        method: GET
+        url: "{{.api_url}}/analysis"
+        query_parameters:
+          duration: 2s
+          dimension: comments
+        assertions:
+          - result.statuscode ShouldEqual 200
+          - result.bodyjson ShouldContainKey total_posts
+          - result.bodyjson ShouldContainKey minimum_timestamp
+          - result.bodyjson ShouldContainKey minimum_timestamp
+          - result.bodyjson ShouldContainKey avg_comments
+
+  - name: Get analysis with retweets dimension
+    steps:
+      - type: http
+        method: GET
+        url: "{{.api_url}}/analysis"
+        query_parameters:
+          duration: 2s
+          dimension: retweets
+        assertions:
+          - result.statuscode ShouldEqual 200
+          - result.bodyjson ShouldContainKey total_posts
+          - result.bodyjson ShouldContainKey minimum_timestamp
+          - result.bodyjson ShouldContainKey minimum_timestamp
+          - result.bodyjson ShouldContainKey avg_retweets
+
+  - name: Get analysis with favorites dimension
+    steps:
+      - type: http
+        method: GET
+        url: "{{.api_url}}/analysis"
+        query_parameters:
+          duration: 2s
+          dimension: favorites
+        assertions:
+          - result.statuscode ShouldEqual 200
+          - result.bodyjson ShouldContainKey total_posts
+          - result.bodyjson ShouldContainKey minimum_timestamp
+          - result.bodyjson ShouldContainKey minimum_timestamp
+          - result.bodyjson ShouldContainKey avg_favorites

@@ -100,6 +100,18 @@ func TestAnalysisHandlerGet(t *testing.T) {
 			hasResponseBody:    false,
 		},
 		{
+			name: "Fail case: negative duration",
+			queryParams: map[string]string{
+				"duration":  "-5s",
+				"dimension": "likes",
+			},
+			authorizedDimension: []string{
+				"likes",
+			},
+			expectedStatusCode: http.StatusBadRequest,
+			hasResponseBody:    false,
+		},
+		{
 			name: "Fail case: no dimension query param",
 			queryParams: map[string]string{
 				"duration": "5s",
