@@ -4,4 +4,5 @@ run:
 linters:
   enable:
     - misspell
+    - revive
   fast: false
