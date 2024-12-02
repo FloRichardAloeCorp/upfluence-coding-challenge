@@ -2,22 +2,4 @@ run:
   deadline: 5m
 
 linters:
-  disable-all: false
-  enable:
-    - errcheck
-    - gas
-    - goconst
-    - goimports
-    - revive
-    - gosec
-    - gosimple
-    - govet
-    - ineffassign
-    - interfacer
-    - maligned
-    - megacheck
-    - misspell
-    - unconvert
-    - unused
-    - whitespace
   fast: false
