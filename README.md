@@ -90,7 +90,7 @@ make test
 
 **NOTE:** The Upfluence public API is mocked during unit tests, so no external services are involved in testing.
 
-Current testing states:
+Current testing state:
 
 ```bash
 go clean -testcache
